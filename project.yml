@@ -1,0 +1,129 @@
+name: $PROJECT_NAME$
+options:
+  bundleIdPrefix: com.$PROJECT_NAME$
+  xcodeVersion: 14.3.1
+  deploymentTarget:
+    iOS: $DEPLOYMENT_TARGET$
+  groupSortPosition: top
+  generateEmptyDirectories: true
+  findCarthageFrameworks: false
+  minimumXcodeGenVersion: 2.18.0
+  createIntermediateGroups: true
+configs:
+  Development: debug
+  Staging: release
+  Production: release
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: $DEPLOYMENT_TARGET$
+    ENABLE_BITCODE: false
+    SWIFT_VERSION: 5.2
+  configs:
+    Development:
+      ENABLE_TESTABILITY: true
+      SWIFT_COMPILATION_MODE: singlefile
+      SWIFT_OPTIMIZATION_LEVEL: -Onone
+      VALIDATE_PRODUCT: false
+    Production:
+      ENABLE_TESTABILITY: false
+      SWIFT_COMPILATION_MODE: wholemodule
+      SWIFT_OPTIMIZATION_LEVEL: -O
+      VALIDATE_PRODUCT: true
+    Staging:
+      ENABLE_TESTABILITY: false
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: STAGING
+      SWIFT_COMPILATION_MODE: wholemodule
+      SWIFT_OPTIMIZATION_LEVEL: -O
+      VALIDATE_PRODUCT: false
+targets:
+  $PROJECT_NAME$:
+    type: application
+    platform: iOS
+    deploymentTarget: $DEPLOYMENT_TARGET$
+    settings:
+      base:
+        MARKETING_VERSION: 1.0.0
+        CURRENT_PROJECT_VERSION: 1
+    sources:
+    - path: ./Source
+      name: $PROJECT_NAME$
+      createIntermediateGroups: true
+    postCompileScripts:
+    - script: "if which swiftlint >/dev/null; then\n   swiftlint\nelse\n   echo \"\
+        warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\
+        \nfi\n"
+      name: Run SwiftLint
+    configVariants:
+      - Development
+      - Staging
+      - Release
+      
+schemes:
+  $PROJECT_NAME$ - Production:
+    build:
+      targets:
+          $PROJECT_NAME$: all
+    run:
+      config: Production
+      commandLineArguments: "--option value"
+      environmentVariables:
+        RUN_ENV_VAR: VALUE
+    test:
+      config: Development
+      commandLineArguments: "--option testValue"
+      gatherCoverageData: true
+      coverageTargets:
+        - $PROJECT_NAME$
+    analyze:
+      config: Development
+    archive:
+      config: Production
+      customArchiveName: $PROJECT_NAME$
+      revealArchiveInOrganizer: false
+  $PROJECT_NAME$ - Development:
+    build:
+      targets:
+          $PROJECT_NAME$: all
+    run:
+      config: Development
+      commandLineArguments: "--option value"
+      environmentVariables:
+        RUN_ENV_VAR: VALUE
+    test:
+      config: Development
+      commandLineArguments: "--option testValue"
+      gatherCoverageData: true
+      coverageTargets:
+        - $PROJECT_NAME$
+    analyze:
+      config: Development
+    archive:
+      config: Development
+      customArchiveName: $PROJECT_NAME$
+      revealArchiveInOrganizer: false
+  $PROJECT_NAME$ - Staging:
+    build:
+      targets:
+          $PROJECT_NAME$: all
+    run:
+      config: Staging
+      commandLineArguments: "--option value"
+      environmentVariables:
+        RUN_ENV_VAR: VALUE
+    test:
+      config: Development
+      commandLineArguments: "--option testValue"
+      gatherCoverageData: true
+      coverageTargets:
+        - $PROJECT_NAME$
+    analyze:
+      config: Development
+    archive:
+      config: Staging
+      customArchiveName: $PROJECT_NAME$
+      revealArchiveInOrganizer: false
+      
+configFiles:
+    Development: ./Source/Core/Configurations/Development.xcconfig
+    Staging: ./Source/Core/Configurations/Staging.xcconfig
+    Production: ./Source/Core/Configurations/Production.xcconfig
